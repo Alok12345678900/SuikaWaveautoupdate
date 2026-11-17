@@ -321,7 +321,14 @@ class MusicService :
             }
         }
 
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val scope =
+        CoroutineScope(
+            Dispatchers.Main + SupervisorJob() +
+                kotlinx.coroutines.CoroutineExceptionHandler { _, e ->
+                    if (e is kotlinx.coroutines.CancellationException) return@CoroutineExceptionHandler
+                    Timber.tag(TAG).e(e, "Unhandled coroutine exception in MusicService (ignored)")
+                },
+        )
 
     private val binder = MusicBinder()
 
@@ -1747,7 +1754,40 @@ class MusicService :
         }
     }
 
+    /**
+     * Entry point aman untuk memutar queue. Kalau player belum siap, permintaan ditunda sampai siap.
+     * Kalau terjadi error (mis. NullPointerException karena service/player belum/sedang dibuat ulang),
+     * dicoba ulang sekali, dan kalau tetap gagal hanya dicatat, tidak membuat app crash.
+     */
     fun playQueue(
+        queue: Queue,
+        playWhenReady: Boolean = true,
+        restoringQueue: Boolean = false,
+    ) {
+        if (!playerInitialized.value || !::player.isInitialized) {
+            Timber.tag(TAG).w("playQueue called before player initialization, queuing request")
+            scope.launch {
+                playerInitialized.first { it }
+                playQueue(queue, playWhenReady, restoringQueue)
+            }
+            return
+        }
+        try {
+            playQueueInternal(queue, playWhenReady, restoringQueue)
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "playQueue gagal, mencoba ulang sekali")
+            scope.launch {
+                delay(400)
+                try {
+                    playQueueInternal(queue, playWhenReady, restoringQueue)
+                } catch (e2: Exception) {
+                    Timber.tag(TAG).e(e2, "playQueue gagal setelah dicoba ulang")
+                }
+            }
+        }
+    }
+
+    private fun playQueueInternal(
         queue: Queue,
         playWhenReady: Boolean = true,
         restoringQueue: Boolean = false,
@@ -1924,6 +1964,7 @@ class MusicService :
     }
 
     fun getAutomix(playlistId: String) {
+        if (!playerInitialized.value || !::player.isInitialized) return
         if (dataStore.get(SimilarContent, true) &&
             !(dataStore.get(DisableLoadMoreWhenRepeatAllKey, false) && player.repeatMode == REPEAT_MODE_ALL)
         ) {

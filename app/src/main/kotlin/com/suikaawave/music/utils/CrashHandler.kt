@@ -22,7 +22,25 @@ class CrashHandler private constructor(
     private val defaultHandler: Thread.UncaughtExceptionHandler? =
         Thread.getDefaultUncaughtExceptionHandler()
 
+    /**
+     * Error pemutaran musik yang tidak fatal (NPE / state belum siap) di thread background
+     * cukup dicatat, app tidak perlu crash. Thread utama tetap lewat layar crash.
+     */
+    private fun isRecoverablePlaybackError(thread: Thread, throwable: Throwable): Boolean {
+        if (thread === android.os.Looper.getMainLooper().thread) return false
+        val recoverableType =
+            throwable is NullPointerException ||
+                throwable is IllegalStateException ||
+                throwable is UninitializedPropertyAccessException
+        if (!recoverableType) return false
+        return throwable.stackTrace.take(8).any { it.className.startsWith("com.suikaawave.music.playback") }
+    }
+
     override fun uncaughtException(thread: Thread, throwable: Throwable) {
+        if (isRecoverablePlaybackError(thread, throwable)) {
+            Timber.e(throwable, "Recoverable playback error on ${thread.name}, ignored")
+            return
+        }
         try {
             val crashLog = buildCrashLog(throwable)
             Timber.e(throwable, "App crashed")

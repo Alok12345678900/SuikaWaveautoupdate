@@ -1010,4 +1010,15 @@
     <string name="circular_player_artwork_desc">Show the player artwork as a glowing circle.</string>
     <string name="trending_searches">Trending searches</string>
     <string name="filter_local_music">Local music</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_installing">Installing update…</string>
+    <string name="update_cancel">Cancel</string>
+    <string name="update_skip">Skip this update</string>
+    <string name="update_found_title">Update found!</string>
+    <string name="update_failed">Update failed: %s</string>
+    <string name="update_close">Close</string>
+    <string name="update_allow_install">Allow SuikaaWave to install apps, then tap Update again</string>
+    <string name="update_channel_name">App updates</string>
+    <string name="update_ready_title">Update ready</string>
+    <string name="update_ready_message">Tap to finish installing the update</string>
 </resources>

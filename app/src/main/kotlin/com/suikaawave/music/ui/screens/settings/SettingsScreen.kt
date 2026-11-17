@@ -37,6 +37,7 @@ import com.suikaawave.music.ui.component.Material3SettingsGroup
 import com.suikaawave.music.ui.component.Material3SettingsItem
 import com.suikaawave.music.ui.component.ReleaseNotesCard
 import com.suikaawave.music.ui.utils.backToMain
+import com.suikaawave.music.update.AppUpdateInstaller
 import com.suikaawave.music.utils.Updater
 import androidx.compose.runtime.remember
 
@@ -254,7 +255,7 @@ fun SettingsScreen(
                                     )
                                 },
                                 showBadge = true,
-                                onClick = { uriHandler.openUri(downloadUrl) }
+                                onClick = { AppUpdateInstaller.startOrExplain(context, downloadUrl, latestVersionName) }
                             )
                         )
                     }

@@ -252,7 +252,7 @@ class PlayerConnection(
             service.playQueue(queue)
         } catch (e: Exception) {
             Timber.tag(TAG).e(e, "Error in playQueue")
-            throw e
+            reportException(e)
         }
     }
 
@@ -281,7 +281,7 @@ class PlayerConnection(
             service.startRadioSeamlessly()
         } catch (e: Exception) {
             Timber.tag(TAG).e(e, "Error in startRadioSeamlessly")
-            throw e
+            reportException(e)
         }
     }
 
@@ -297,7 +297,7 @@ class PlayerConnection(
             service.playNext(items)
         } catch (e: Exception) {
             Timber.tag(TAG).e(e, "Error in playNext")
-            throw e
+            reportException(e)
         }
     }
 
@@ -313,7 +313,7 @@ class PlayerConnection(
             service.addToQueue(items)
         } catch (e: Exception) {
             Timber.tag(TAG).e(e, "Error in addToQueue")
-            throw e
+            reportException(e)
         }
     }
 
@@ -326,11 +326,28 @@ class PlayerConnection(
     }
 
     fun toggleMute() {
-        service.toggleMute()
+        try {
+            service.toggleMute()
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Error in toggleMute")
+        }
     }
 
     fun setMuted(muted: Boolean) {
-        service.setMuted(muted)
+        try {
+            service.setMuted(muted)
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Error in setMuted")
+        }
+    }
+
+    /** Wrapper aman untuk [MusicService.getAutomix] supaya UI tidak crash kalau service belum siap. */
+    fun getAutomix(playlistId: String) {
+        try {
+            service.getAutomix(playlistId)
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Error in getAutomix")
+        }
     }
 
     fun toggleLibrary() {

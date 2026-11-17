@@ -32,6 +32,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -86,6 +87,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
+import com.suikaawave.music.update.UpdateState
+import com.suikaawave.music.update.AppUpdateInstaller
+import android.text.format.Formatter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Button
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -1457,67 +1465,151 @@ class MainActivity : FragmentActivity() {
                                     }
                                 }
                             }
-                            AlertDialog(
-                                onDismissRequest = dismissUpdate,
-                                title = { Text(stringResource(R.string.update_available_title)) },
-                                text = {
-                                    Column(
-                                        modifier =
-                                            Modifier
-                                                .heightIn(max = 480.dp)
-                                                .verticalScroll(rememberScrollState()),
-                                    ) {
-                                        Text(
-                                            text =
-                                                stringResource(
-                                                    if (update.isKmp) {
-                                                        R.string.kmp_upgrade_title
-                                                    } else {
-                                                        R.string.update_available_message
-                                                    },
-                                                    update.release.versionName,
-                                                ),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                        )
-                                        if (update.isKmp) {
+                            val updateState by AppUpdateInstaller.state.collectAsState()
+                            val updateContext = LocalContext.current
+                            var showUpdateProgress by remember { mutableStateOf(false) }
+                            val busy =
+                                updateState is UpdateState.Downloading || updateState is UpdateState.Installing
+
+                            if (!(showUpdateProgress && updateState !is UpdateState.Idle)) {
+                                AlertDialog(
+                                    onDismissRequest = { availableUpdate = null },
+                                    title = {
+                                        Column {
+                                            Text(stringResource(R.string.update_found_title))
                                             Text(
-                                                text = stringResource(R.string.kmp_upgrade_warning),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.padding(top = 12.dp),
+                                                text = "${BuildConfig.BASE_VERSION_NAME} \u2192 ${update.release.versionName}",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                modifier = Modifier.padding(top = 4.dp),
                                             )
                                         }
-                                        Text(
-                                            text = stringResource(R.string.changelog),
-                                            style = MaterialTheme.typography.titleSmall,
-                                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-                                        )
-                                        Text(
-                                            text = update.release.description.ifBlank { stringResource(R.string.changelog_empty) },
-                                            style = MaterialTheme.typography.bodySmall,
-                                        )
-                                    }
-                                },
-                                confirmButton = {
-                                    TextButton(
-                                        onClick = {
-                                            dismissUpdate()
-                                            startActivity(Intent(Intent.ACTION_VIEW, update.downloadUrl.toUri()))
-                                        },
-                                    ) {
+                                    },
+                                    text = {
+                                        Column(
+                                            modifier =
+                                                Modifier
+                                                    .heightIn(max = 480.dp)
+                                                    .verticalScroll(rememberScrollState()),
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.changelog),
+                                                style = MaterialTheme.typography.titleSmall,
+                                                modifier = Modifier.padding(bottom = 8.dp),
+                                            )
+                                            Text(
+                                                text = update.release.description.ifBlank { stringResource(R.string.changelog_empty) },
+                                                style = MaterialTheme.typography.bodySmall,
+                                            )
+                                        }
+                                    },
+                                    confirmButton = {
+                                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.fillMaxWidth()) {
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                TextButton(onClick = dismissUpdate) {
+                                                    Text(stringResource(R.string.update_skip))
+                                                }
+                                                Button(
+                                                    onClick = {
+                                                        val started =
+                                                            AppUpdateInstaller.start(
+                                                                updateContext,
+                                                                update.downloadUrl,
+                                                                update.release.versionName,
+                                                            )
+                                                        if (started) {
+                                                            showUpdateProgress = true
+                                                        } else {
+                                                            Toast
+                                                                .makeText(
+                                                                    updateContext,
+                                                                    R.string.update_allow_install,
+                                                                    Toast.LENGTH_LONG,
+                                                                ).show()
+                                                        }
+                                                    },
+                                                ) {
+                                                    Text(stringResource(R.string.update_action))
+                                                }
+                                            }
+                                            TextButton(onClick = { availableUpdate = null }) {
+                                                Text(stringResource(R.string.update_cancel))
+                                            }
+                                        }
+                                    },
+                                )
+                            } else {
+                                // Dialog progres: boleh ditutup, download tetap jalan di latar belakang
+                                AlertDialog(
+                                    onDismissRequest = {
+                                        showUpdateProgress = false
+                                        availableUpdate = null
+                                    },
+                                    title = {
                                         Text(
                                             stringResource(
-                                                if (update.isKmp) R.string.kmp_upgrade_action else R.string.update_action,
+                                                if (updateState is UpdateState.Installing) {
+                                                    R.string.update_installing
+                                                } else {
+                                                    R.string.update_downloading
+                                                },
                                             ),
                                         )
-                                    }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = dismissUpdate) {
-                                        Text(stringResource(R.string.kmp_upgrade_later))
-                                    }
-                                },
-                            )
+                                    },
+                                    text = {
+                                        when (val st = updateState) {
+                                            is UpdateState.Downloading -> {
+                                                Column(modifier = Modifier.fillMaxWidth()) {
+                                                    if (st.totalBytes > 0) {
+                                                        LinearProgressIndicator(
+                                                            progress = { st.progress },
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                        )
+                                                        Text(
+                                                            text =
+                                                                "${(st.progress * 100).toInt()}% (" +
+                                                                    "${Formatter.formatShortFileSize(updateContext, st.downloadedBytes)} / " +
+                                                                    "${Formatter.formatShortFileSize(updateContext, st.totalBytes)})",
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            modifier = Modifier.padding(top = 12.dp),
+                                                        )
+                                                    } else {
+                                                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                                                    }
+                                                }
+                                            }
+                                            is UpdateState.Installing ->
+                                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                                            is UpdateState.Failed ->
+                                                Text(
+                                                    text = stringResource(R.string.update_failed, st.message),
+                                                    color = MaterialTheme.colorScheme.error,
+                                                )
+                                            UpdateState.Idle -> {}
+                                        }
+                                    },
+                                    confirmButton = {
+                                        if (updateState is UpdateState.Failed) {
+                                            TextButton(
+                                                onClick = {
+                                                    AppUpdateInstaller.reset()
+                                                    showUpdateProgress = false
+                                                },
+                                            ) {
+                                                Text(stringResource(R.string.update_close))
+                                            }
+                                        } else if (updateState is UpdateState.Downloading) {
+                                            TextButton(
+                                                onClick = {
+                                                    AppUpdateInstaller.cancel(updateContext)
+                                                    showUpdateProgress = false
+                                                },
+                                            ) {
+                                                Text(stringResource(R.string.update_cancel))
+                                            }
+                                        }
+                                    },
+                                )
+                            }
                         }
                     }
                 }

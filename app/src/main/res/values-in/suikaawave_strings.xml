@@ -861,4 +861,15 @@
     <string name="error_offline_playback">Anda sedang offline. Hubungkan ke internet, atau putar trek yang telah diunduh untuk penggunaan offline.</string>
     <string name="error_explicit_login_recommended">Pemutaran konten eksplisit bekerja lebih baik dengan akun yang sudah login.</string>
     <string name="ai_provider_inception_help">Kunjungi https://platform.inceptionlabs.ai untuk mendapatkan kunci API</string>
+    <string name="update_downloading">Mengunduh pembaruan…</string>
+    <string name="update_installing">Memasang pembaruan…</string>
+    <string name="update_cancel">Batalkan</string>
+    <string name="update_skip">Lewati update ini</string>
+    <string name="update_found_title">Pembaruan ditemukan!</string>
+    <string name="update_failed">Update gagal: %s</string>
+    <string name="update_close">Tutup</string>
+    <string name="update_allow_install">Izinkan SuikaaWave memasang aplikasi, lalu tekan Perbarui lagi</string>
+    <string name="update_channel_name">Pembaruan aplikasi</string>
+    <string name="update_ready_title">Update siap</string>
+    <string name="update_ready_message">Ketuk untuk menyelesaikan instalasi update</string>
 </resources>

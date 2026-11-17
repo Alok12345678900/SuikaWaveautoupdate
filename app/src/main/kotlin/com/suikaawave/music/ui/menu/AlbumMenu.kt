@@ -336,7 +336,7 @@ fun AlbumMenu(
                                     onDismiss()
                                     if (songs.isNotEmpty()) {
                                         album.album.playlistId?.let { playlistId ->
-                                            playerConnection.service.getAutomix(playlistId)
+                                            playerConnection.getAutomix(playlistId)
                                         }
                                         playerConnection.playQueue(
                                             ListQueue(

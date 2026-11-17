@@ -68,6 +68,7 @@ import com.suikaawave.music.ui.component.InfoLabel
 import com.suikaawave.music.ui.component.Material3SettingsGroup
 import com.suikaawave.music.ui.component.Material3SettingsItem
 import com.suikaawave.music.ui.component.TextFieldDialog
+import com.suikaawave.music.update.AppUpdateInstaller
 import com.suikaawave.music.utils.Updater
 import com.suikaawave.music.utils.rememberPreference
 import com.suikaawave.music.viewmodels.AccountSettingsViewModel
@@ -422,7 +423,7 @@ fun AccountSettings(
                                 description = { Text(latestVersionName) },
                                 icon = painterResource(R.drawable.update),
                                 showBadge = true,
-                                onClick = { uriHandler.openUri(downloadUrl) }
+                                onClick = { AppUpdateInstaller.startOrExplain(context, downloadUrl, latestVersionName) }
                             )
                         )
                     }
