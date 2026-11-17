@@ -376,7 +376,6 @@
     <string name="update_available_title">New update available</string>
     <string name="update_available_message">SuikaaWave %s is ready to download.</string>
     <string name="update_action">Update</string>
-    <string name="update_channel_name">App updates</string>
     <string name="update_channel_desc">Notifications about new app versions</string>
     <string name="kmp_upgrade_title">SuikaaWave KMP %s is available</string>
     <string name="kmp_upgrade_warning">SuikaaWave KMP is still in development. You may encounter bugs or incomplete features.</string>
@@ -1018,7 +1017,6 @@
     <string name="update_failed">Update failed: %s</string>
     <string name="update_close">Close</string>
     <string name="update_allow_install">Allow SuikaaWave to install apps, then tap Update again</string>
-    <string name="update_channel_name">App updates</string>
     <string name="update_ready_title">Update ready</string>
     <string name="update_ready_message">Tap to finish installing the update</string>
 </resources>

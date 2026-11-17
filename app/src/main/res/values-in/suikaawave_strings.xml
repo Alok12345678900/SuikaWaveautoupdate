@@ -155,7 +155,6 @@
     <string name="lastfm_now_playing">Kirim status Now Playing</string>
     <string name="scrobbling_configuration">Konfigurasi scrobbling</string>
     <string name="scrobble_min_track_duration">Scrobble lagu yang lebih panjang dari (detik)</string>
-    <string name="update_channel_name">Pembaruan aplikasi</string>
     <string name="update_channel_desc">Notifikasi tentang versi aplikasi baru</string>
     <string name="scrobble_delay_minutes">Penundaan scrobble (menit)</string>
     <string name="scrobble_delay_percent">Penundaan scrobble (persentase)</string>
@@ -869,7 +868,6 @@
     <string name="update_failed">Update gagal: %s</string>
     <string name="update_close">Tutup</string>
     <string name="update_allow_install">Izinkan SuikaaWave memasang aplikasi, lalu tekan Perbarui lagi</string>
-    <string name="update_channel_name">Pembaruan aplikasi</string>
     <string name="update_ready_title">Update siap</string>
     <string name="update_ready_message">Ketuk untuk menyelesaikan instalasi update</string>
 </resources>
