@@ -3766,6 +3766,19 @@ class MusicService :
         }
     }
 
+    /**
+     * True kalau seluruh file lagu sudah ada di downloadCache. Panjang file diambil dari
+     * metadata cache itu sendiri, jadi tetap bisa diputar offline walau baris format di
+     * database kosong / contentLength-nya tidak diketahui.
+     */
+    private fun isFullyDownloaded(mediaId: String): Boolean {
+        val length =
+            ContentMetadata
+                .getContentLength(downloadCache.getContentMetadata(mediaId))
+                .takeIf { it > 0L } ?: return false
+        return downloadCache.isCached(mediaId, 0, length)
+    }
+
     private fun createDataSourceFactory(
         normalizationProcessor: VolumeNormalizationAudioProcessor,
         playerProvider: () -> ExoPlayer?,
@@ -3795,7 +3808,9 @@ class MusicService :
                         else -> CHUNK_LENGTH // contentLength unknown yet — fall back to old probe size
                     }
 
-                if (downloadCache.isCached(mediaId, dataSpec.position, requiredLength)) {
+                if (downloadCache.isCached(mediaId, dataSpec.position, requiredLength) ||
+                    isFullyDownloaded(mediaId)
+                ) {
                     recoverSongDeduped(mediaId)
                     return@Factory dataSpec
                 }

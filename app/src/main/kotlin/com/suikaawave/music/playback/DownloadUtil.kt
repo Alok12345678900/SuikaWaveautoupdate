@@ -5,8 +5,12 @@
 
 package com.suikaawave.music.playback
 
+import android.content.ContentValues
 import android.content.Context
 import android.net.ConnectivityManager
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.media3.database.DatabaseProvider
@@ -14,6 +18,7 @@ import androidx.media3.datasource.HttpDataSource
 import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.ContentMetadata
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
@@ -48,6 +53,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -56,6 +62,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import okhttp3.OkHttpClient
 import timber.log.Timber
+import java.io.File
 import java.io.IOException
 import java.time.LocalDateTime
 import java.util.concurrent.Executor
@@ -258,6 +265,7 @@ constructor(
                                 Download.STATE_COMPLETED -> {
                                     removeFromPlayerCache(download.request.id)
                                     database.updateDownloadedInfo(download.request.id, true, LocalDateTime.now())
+                                    exportToLocalStorage(download.request.id)
                                 }
                                 Download.STATE_FAILED,
                                 Download.STATE_STOPPED,
@@ -391,6 +399,91 @@ constructor(
 
     fun release() {
         scope.cancel()
+    }
+
+    /**
+     * Salin lagu yang selesai di-download ke penyimpanan lokal HP (Music/SuikaaWave)
+     * sebagai file audio biasa. Gagal salin tidak mempengaruhi download / putar offline.
+     */
+    private suspend fun exportToLocalStorage(songId: String) {
+        runCatching {
+            val contentLength =
+                ContentMetadata
+                    .getContentLength(downloadCache.getContentMetadata(songId))
+                    .takeIf { it > 0L } ?: return
+            if (!downloadCache.isCached(songId, 0, contentLength)) return
+
+            val song = database.getSongByIdBlocking(songId)
+            val mimeType = database.format(songId).first()?.mimeType ?: "audio/mp4"
+            val ext = if (mimeType.contains("webm")) "webm" else "m4a"
+            val title = song?.song?.title ?: songId
+            val artist = song?.artists?.joinToString(", ") { it.name }
+            val baseName = listOfNotNull(artist?.takeIf { it.isNotBlank() }, title).joinToString(" - ")
+            val fileName = "${baseName.replace(Regex("[\\\\/:*?\"<>|]"), "_").take(120)} [$songId].$ext"
+
+            fun writeTo(out: java.io.OutputStream) {
+                var position = 0L
+                for (span in downloadCache.getCachedSpans(songId)) {
+                    val file = span.file ?: continue
+                    if (!span.isCached || span.position + span.length <= position) continue
+                    val skip = position - span.position
+                    file.inputStream().use { input ->
+                        if (skip > 0) input.skip(skip)
+                        position += input.copyTo(out)
+                    }
+                }
+                out.flush()
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val relativePath = Environment.DIRECTORY_MUSIC + "/SuikaaWave"
+                val resolver = context.contentResolver
+                val collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                resolver.query(
+                    collection,
+                    arrayOf(MediaStore.MediaColumns._ID),
+                    "${MediaStore.MediaColumns.DISPLAY_NAME} = ? AND ${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?",
+                    arrayOf(fileName, "$relativePath%"),
+                    null,
+                )?.use { if (it.moveToFirst()) return } // sudah pernah disalin
+
+                val values =
+                    ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                        put(MediaStore.MediaColumns.MIME_TYPE, mimeType.substringBefore(";"))
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
+                        put(MediaStore.Audio.Media.TITLE, title)
+                        artist?.let { put(MediaStore.Audio.Media.ARTIST, it) }
+                        put(MediaStore.MediaColumns.IS_PENDING, 1)
+                    }
+                val uri = resolver.insert(collection, values) ?: return
+                try {
+                    resolver.openOutputStream(uri)?.use(::writeTo) ?: error("Gagal membuka output stream")
+                    resolver.update(
+                        uri,
+                        ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) },
+                        null,
+                        null,
+                    )
+                } catch (e: Exception) {
+                    resolver.delete(uri, null, null)
+                    throw e
+                }
+            } else {
+                // Android 8-9: tanpa izin storage, simpan di folder Music milik app
+                val dir = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), "SuikaaWave")
+                dir.mkdirs()
+                val target = File(dir, fileName)
+                if (target.exists()) return
+                val tmp = File(dir, "$fileName.part")
+                try {
+                    tmp.outputStream().use(::writeTo)
+                    tmp.renameTo(target)
+                } finally {
+                    tmp.delete()
+                }
+            }
+        }.onFailure { Timber.tag(TAG).w(it, "Gagal menyalin $songId ke penyimpanan lokal") }
     }
 
     private fun removeFromPlayerCache(songId: String) {
