@@ -870,4 +870,5 @@
     <string name="update_allow_install">Izinkan SuikaaWave memasang aplikasi, lalu tekan Perbarui lagi</string>
     <string name="update_ready_title">Update siap</string>
     <string name="update_ready_message">Ketuk untuk menyelesaikan instalasi update</string>
+    <string name="update_channel_name">Pembaruan aplikasi</string>
 </resources>

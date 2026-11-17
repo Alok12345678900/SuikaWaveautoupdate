@@ -1019,4 +1019,5 @@
     <string name="update_allow_install">Allow SuikaaWave to install apps, then tap Update again</string>
     <string name="update_ready_title">Update ready</string>
     <string name="update_ready_message">Tap to finish installing the update</string>
+    <string name="update_channel_name">App updates</string>
 </resources>
