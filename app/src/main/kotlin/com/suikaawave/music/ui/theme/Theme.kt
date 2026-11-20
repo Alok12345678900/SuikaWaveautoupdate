@@ -10,6 +10,11 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.CompositionLocalProvider
@@ -107,7 +112,23 @@ fun SuikaaWaveTheme(
         if (glass) {
             // Efek tekan halus & responsif untuk semua tombol / item yang bisa diklik
             CompositionLocalProvider(LocalIndication provides GlassIndication) {
-                Box(Modifier.fillMaxSize().liquidBackdrop()) { content() }
+                Box(Modifier.fillMaxSize()) {
+                    Image(
+                        painter = painterResource(com.suikaawave.music.R.drawable.sakura_shrine_background),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    // Slight dark overlay keeps translucent glass panels and text readable.
+                    Box(
+                        Modifier.fillMaxSize().background(
+                            Brush.verticalGradient(
+                                listOf(Color.Black.copy(alpha = 0.12f), Color.Black.copy(alpha = 0.28f)),
+                            ),
+                        ),
+                    )
+                    content()
+                }
             }
         } else {
             content()
