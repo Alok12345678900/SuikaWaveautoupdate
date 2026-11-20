@@ -8,7 +8,12 @@ package com.suikaawave.music.ui.theme
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +52,9 @@ fun SuikaaWaveTheme(
     val useSystemDynamicColor = (themeColor == DefaultThemeColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
     // Select the appropriate color scheme generation method
-    val baseColorScheme = if (palette != null && darkTheme) {
+    val baseColorScheme = if (glass) {
+        GlassBaseScheme
+    } else if (palette != null && darkTheme) {
         // Fixed palette theme: fully token-driven, animated on change.
         remember(palette) { palette.toDarkColorScheme() }.animated()
     } else if (palette != null) {
@@ -84,9 +91,24 @@ fun SuikaaWaveTheme(
     // Use standard MaterialTheme instead of MaterialExpressiveTheme
     MaterialTheme(
         colorScheme = colorScheme,
+        shapes =
+            if (glass) {
+                Shapes(
+                    extraSmall = RoundedCornerShape(10.dp),
+                    small = RoundedCornerShape(16.dp),
+                    medium = RoundedCornerShape(22.dp),
+                    large = RoundedCornerShape(28.dp),
+                    extraLarge = RoundedCornerShape(36.dp),
+                )
+            } else {
+                MaterialTheme.shapes
+            },
     ) {
         if (glass) {
-            Box(Modifier.fillMaxSize().liquidBackdrop(baseColorScheme)) { content() }
+            // Efek tekan halus & responsif untuk semua tombol / item yang bisa diklik
+            CompositionLocalProvider(LocalIndication provides GlassIndication) {
+                Box(Modifier.fillMaxSize().liquidBackdrop()) { content() }
+            }
         } else {
             content()
         }
