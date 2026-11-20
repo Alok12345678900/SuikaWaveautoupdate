@@ -5,6 +5,9 @@
 
 package com.suikaawave.music.ui.player
 
+import com.suikaawave.music.ui.theme.GLASS_PLAYER_THEME
+import com.suikaawave.music.ui.theme.glassOutline
+import com.suikaawave.music.ui.theme.glassSurface
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -1292,7 +1295,16 @@ private fun PlayerQueueButton(
 
     val appliedModifier =
         if (isActive) {
-            modifier.then(buttonModifier.background(textButtonColor)).alpha(alphaFactor)
+            modifier
+                .then(
+                    if (GLASS_PLAYER_THEME) {
+                        buttonModifier.glassSurface(shape)
+                    } else {
+                        buttonModifier.background(textButtonColor)
+                    },
+                ).alpha(alphaFactor)
+        } else if (GLASS_PLAYER_THEME) {
+            modifier.then(buttonModifier.glassOutline(shape)).alpha(alphaFactor)
         } else {
             modifier
                 .then(
@@ -1311,7 +1323,7 @@ private fun PlayerQueueButton(
         if (text != null) {
             Text(
                 text = text,
-                color = iconButtonColor.copy(alpha = if (enabled) 1f else 0.6f),
+                color = (if (GLASS_PLAYER_THEME) Color.White else iconButtonColor).copy(alpha = if (enabled) 1f else 0.6f),
                 fontSize = 10.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -1324,7 +1336,7 @@ private fun PlayerQueueButton(
         } else {
             val baseTint =
                 if (isActive) {
-                    iconButtonColor
+                    if (GLASS_PLAYER_THEME) Color.White else iconButtonColor
                 } else {
                     when (playerBackground) {
                         PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT -> {

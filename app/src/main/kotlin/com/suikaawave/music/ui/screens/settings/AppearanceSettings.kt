@@ -197,7 +197,7 @@ fun AppearanceSettings(
     val (circularPlayerArtwork, onCircularPlayerArtworkChange) =
         rememberPreference(
             CircularPlayerArtworkKey,
-            defaultValue = true,
+            defaultValue = false,
         )
     val (playerBackground, onPlayerBackgroundChange) =
         rememberEnumPreference(

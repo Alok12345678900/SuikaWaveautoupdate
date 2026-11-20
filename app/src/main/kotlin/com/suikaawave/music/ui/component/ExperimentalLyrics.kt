@@ -5,6 +5,7 @@
 
 package com.suikaawave.music.ui.component
 
+import com.suikaawave.music.ui.theme.GLASS_PLAYER_THEME
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
@@ -203,10 +204,12 @@ fun ExperimentalLyrics(
     val currentSong by playerConnection.currentSong.collectAsStateWithLifecycle(initialValue = null)
     val lyrics = remember(lyricsEntity) { lyricsEntity?.lyrics?.trim() }
 
-    val playerBackground by rememberEnumPreference(
+    val storedPlayerBackground by rememberEnumPreference(
         key = PlayerBackgroundStyleKey,
-        defaultValue = PlayerBackgroundStyle.DEFAULT
+        defaultValue = PlayerBackgroundStyle.DEFAULT,
     )
+
+    val playerBackground = if (GLASS_PLAYER_THEME) PlayerBackgroundStyle.BLUR else storedPlayerBackground
 
     val enabledLanguages = remember(romanizeLyricsList.value) {
         if (romanizeLyricsList.value.isEmpty()) {

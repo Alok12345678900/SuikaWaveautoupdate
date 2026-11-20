@@ -5,6 +5,9 @@
 
 package com.suikaawave.music.ui.player
 
+import com.suikaawave.music.ui.theme.GlassFill
+import com.suikaawave.music.ui.theme.glassSurface
+import com.suikaawave.music.ui.theme.GLASS_PLAYER_THEME
 import androidx.activity.compose.BackHandler
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -233,10 +236,12 @@ fun BottomSheetPlayer(
         mutableStateOf(false)
     }
 
-    val playerBackground by rememberEnumPreference(
+    val storedPlayerBackground by rememberEnumPreference(
         key = PlayerBackgroundStyleKey,
         defaultValue = PlayerBackgroundStyle.DEFAULT,
     )
+
+    val playerBackground = if (GLASS_PLAYER_THEME) PlayerBackgroundStyle.BLUR else storedPlayerBackground
     val playerButtonsStyle by rememberEnumPreference(
         key = PlayerButtonsStyleKey,
         defaultValue = PlayerButtonsStyle.DEFAULT,
@@ -1153,8 +1158,8 @@ fun BottomSheetPlayer(
                                     shape = shareShape,
                                     colors =
                                         IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = textButtonColor,
-                                            contentColor = iconButtonColor,
+                                            containerColor = if (GLASS_PLAYER_THEME) GlassFill else textButtonColor,
+                                            contentColor = if (GLASS_PLAYER_THEME) Color.White else iconButtonColor,
                                         ),
                                     modifier = Modifier.size(42.dp),
                                 ) {
@@ -1181,8 +1186,8 @@ fun BottomSheetPlayer(
                                     shape = shareShape,
                                     colors =
                                         IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = textButtonColor,
-                                            contentColor = iconButtonColor,
+                                            containerColor = if (GLASS_PLAYER_THEME) GlassFill else textButtonColor,
+                                            contentColor = if (GLASS_PLAYER_THEME) Color.White else iconButtonColor,
                                         ),
                                     modifier = Modifier.size(42.dp),
                                 ) {
@@ -1219,8 +1224,8 @@ fun BottomSheetPlayer(
                                     shape = favShape,
                                     colors =
                                         IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = textButtonColor,
-                                            contentColor = iconButtonColor,
+                                            containerColor = if (GLASS_PLAYER_THEME) GlassFill else textButtonColor,
+                                            contentColor = if (GLASS_PLAYER_THEME) Color.White else iconButtonColor,
                                         ),
                                     modifier = Modifier.size(42.dp),
                                 ) {
@@ -1239,8 +1244,8 @@ fun BottomSheetPlayer(
                                     shape = favShape,
                                     colors =
                                         IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = textButtonColor,
-                                            contentColor = iconButtonColor,
+                                            containerColor = if (GLASS_PLAYER_THEME) GlassFill else textButtonColor,
+                                            contentColor = if (GLASS_PLAYER_THEME) Color.White else iconButtonColor,
                                         ),
                                     modifier = Modifier.size(42.dp),
                                 ) {
@@ -1268,13 +1273,13 @@ fun BottomSheetPlayer(
                                     Modifier
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(24.dp))
-                                        .background(textButtonColor)
+                                        .then(if (GLASS_PLAYER_THEME) Modifier.glassSurface(RoundedCornerShape(24.dp)) else Modifier.background(textButtonColor))
                                         .clickable { isFullScreen = !isFullScreen },
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.fullscreen),
                                     contentDescription = null,
-                                    tint = iconButtonColor,
+                                    tint = if (GLASS_PLAYER_THEME) Color.White else iconButtonColor,
                                     modifier =
                                         Modifier
                                             .align(Alignment.Center)
@@ -1287,7 +1292,7 @@ fun BottomSheetPlayer(
                                     Modifier
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(24.dp))
-                                        .background(textButtonColor)
+                                        .then(if (GLASS_PLAYER_THEME) Modifier.glassSurface(RoundedCornerShape(24.dp)) else Modifier.background(textButtonColor))
                                         .clickable {
                                             val intent =
                                                 Intent().apply {
@@ -1304,7 +1309,7 @@ fun BottomSheetPlayer(
                                 Icon(
                                     painter = painterResource(R.drawable.share),
                                     contentDescription = null,
-                                    tint = iconButtonColor,
+                                    tint = if (GLASS_PLAYER_THEME) Color.White else iconButtonColor,
                                     modifier =
                                         Modifier
                                             .align(Alignment.Center)
@@ -1324,7 +1329,7 @@ fun BottomSheetPlayer(
                                     Modifier
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(24.dp))
-                                        .background(textButtonColor)
+                                        .then(if (GLASS_PLAYER_THEME) Modifier.glassSurface(RoundedCornerShape(24.dp)) else Modifier.background(textButtonColor))
                                         .clickable {
                                             menuState.show {
                                                 com.suikaawave.music.ui.menu.LyricsMenu(
@@ -1346,7 +1351,7 @@ fun BottomSheetPlayer(
                                 Icon(
                                     painter = painterResource(R.drawable.more_horiz),
                                     contentDescription = null,
-                                    tint = iconButtonColor,
+                                    tint = if (GLASS_PLAYER_THEME) Color.White else iconButtonColor,
                                     modifier =
                                         Modifier
                                             .align(Alignment.Center)
@@ -1633,8 +1638,8 @@ fun BottomSheetPlayer(
                                 interactionSource = playPauseInteractionSource,
                                 colors =
                                     IconButtonDefaults.filledIconButtonColors(
-                                        containerColor = textButtonColor,
-                                        contentColor = iconButtonColor,
+                                        containerColor = if (GLASS_PLAYER_THEME) GlassFill else textButtonColor,
+                                        contentColor = if (GLASS_PLAYER_THEME) Color.White else iconButtonColor,
                                     ),
                                 modifier =
                                     Modifier
@@ -1753,7 +1758,7 @@ fun BottomSheetPlayer(
                                     Modifier
                                         .size(72.dp)
                                         .clip(RoundedCornerShape(playPauseRoundness))
-                                        .background(textButtonColor)
+                                        .then(if (GLASS_PLAYER_THEME) Modifier.glassSurface(RoundedCornerShape(playPauseRoundness)) else Modifier.background(textButtonColor))
                                         .clickable {
                                             if (isListenTogetherGuest) {
                                                 playerConnection.toggleMute()
@@ -1790,7 +1795,7 @@ fun BottomSheetPlayer(
                                             },
                                         ),
                                     contentDescription = null,
-                                    colorFilter = ColorFilter.tint(iconButtonColor),
+                                    colorFilter = ColorFilter.tint(if (GLASS_PLAYER_THEME) Color.White else iconButtonColor),
                                     modifier =
                                         Modifier
                                             .align(Alignment.Center)
@@ -2149,7 +2154,7 @@ private fun PlayerMoreMenuButton(
             Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(textButtonColor)
+                .then(if (GLASS_PLAYER_THEME) Modifier.glassSurface(RoundedCornerShape(24.dp)) else Modifier.background(textButtonColor))
                 .clickable {
                     menuState.show {
                         PlayerMenu(
@@ -2170,7 +2175,7 @@ private fun PlayerMoreMenuButton(
         Image(
             painter = painterResource(R.drawable.more_horiz),
             contentDescription = null,
-            colorFilter = ColorFilter.tint(iconButtonColor),
+            colorFilter = ColorFilter.tint(if (GLASS_PLAYER_THEME) Color.White else iconButtonColor),
         )
     }
 }

@@ -5,6 +5,7 @@
 
 package com.suikaawave.music.ui.player
 
+import com.suikaawave.music.ui.theme.GLASS_PLAYER_THEME
 import com.suikaawave.music.constants.CircularPlayerArtworkKey
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.border
@@ -224,10 +225,11 @@ fun Thumbnail(
     val swipeThumbnail = swipeThumbnailPref && !isListenTogetherGuest
     val hidePlayerThumbnail by rememberPreference(HidePlayerThumbnailKey, false)
     val cropAlbumArt by rememberPreference(CropAlbumArtKey, false)
-    val playerBackground by rememberEnumPreference(
+    val storedPlayerBackground by rememberEnumPreference(
         key = PlayerBackgroundStyleKey,
-        defaultValue = PlayerBackgroundStyle.DEFAULT
+        defaultValue = PlayerBackgroundStyle.DEFAULT,
     )
+    val playerBackground = if (GLASS_PLAYER_THEME) PlayerBackgroundStyle.BLUR else storedPlayerBackground
     
     // Pre-calculate text color based on background style
     val textBackgroundColor = getTextColor(playerBackground)
@@ -510,7 +512,7 @@ private fun ThumbnailItem(
     val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
     var skipMultiplier by remember { mutableIntStateOf(1) }
     var lastTapTime by remember { mutableLongStateOf(0L) }
-    val circularArtwork by rememberPreference(CircularPlayerArtworkKey, true)
+    val circularArtwork by rememberPreference(CircularPlayerArtworkKey, false)
     val ringColor = MaterialTheme.colorScheme.primary
     val artworkShape = if (circularArtwork) CircleShape else RoundedCornerShape(dimensions.cornerRadius)
 
@@ -582,6 +584,8 @@ private fun ThumbnailItem(
                 .then(
                     if (circularArtwork) {
                         Modifier.border(3.dp, ringColor.copy(alpha = 0.7f), CircleShape)
+                    } else if (GLASS_PLAYER_THEME) {
+                        Modifier.border(1.dp, Color.White.copy(alpha = 0.4f), artworkShape)
                     } else {
                         Modifier
                     }
