@@ -999,6 +999,7 @@
     <string name="color_theme_amber_gold">Amber Gold</string>
     <string name="color_theme_cyan_neon">Cyan Neon</string>
     <string name="color_theme_amoled_black">AMOLED Black</string>
+    <string name="color_theme_night_player">Night Player</string>
     <string name="color_theme_material_you">Material You</string>
     <string name="color_theme_preview_now_playing">Now playing</string>
     <string name="home_greeting_morning">Good morning</string>

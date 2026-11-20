@@ -64,11 +64,15 @@ enum class AppColorTheme(
         R.string.color_theme_amoled_black,
         ThemePalette(Color(0xFFC084FC), Color(0xFFE9D5FF), Color(0xFF000000), Color(0xFF101010)),
     ),
+    NIGHT_PLAYER(
+        R.string.color_theme_night_player,
+        ThemePalette(Color(0xFFE8E3E5), Color(0xFFB8A3A8), Color(0xFF211A1D), Color(0xFF34282D)),
+    ),
     MATERIAL_YOU(R.string.color_theme_material_you, null),
     ;
 
     companion object {
-        val Default = PURPLE_NIGHT
+        val Default = NIGHT_PLAYER
     }
 }
 
