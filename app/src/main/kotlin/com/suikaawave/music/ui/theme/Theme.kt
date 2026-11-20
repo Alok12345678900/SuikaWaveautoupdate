@@ -8,6 +8,8 @@ package com.suikaawave.music.ui.theme
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -16,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -33,8 +36,11 @@ fun SuikaaWaveTheme(
     pureBlack: Boolean = false,
     themeColor: Color = DefaultThemeColor,
     appTheme: AppColorTheme = AppColorTheme.MATERIAL_YOU,
+    glass: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    // Liquid glass selalu pakai varian gelap supaya kaca putih terlihat tembus pandang
+    val darkTheme = darkTheme || glass
     val context = LocalContext.current
     val palette = appTheme.palette
     // Determine if system dynamic colors should be used (Android S+ and default theme color)
@@ -65,8 +71,10 @@ fun SuikaaWaveTheme(
     }
 
     // Apply pureBlack modification if needed, similar to original logic
-    val colorScheme = remember(baseColorScheme, pureBlack, darkTheme) {
-        if (darkTheme && pureBlack) {
+    val colorScheme = remember(baseColorScheme, pureBlack, darkTheme, glass) {
+        if (glass) {
+            baseColorScheme.liquidGlass()
+        } else if (darkTheme && pureBlack) {
             baseColorScheme.pureBlack(true)
         } else {
             baseColorScheme
@@ -76,8 +84,13 @@ fun SuikaaWaveTheme(
     // Use standard MaterialTheme instead of MaterialExpressiveTheme
     MaterialTheme(
         colorScheme = colorScheme,
-        content = content,
-    )
+    ) {
+        if (glass) {
+            Box(Modifier.fillMaxSize().liquidBackdrop(baseColorScheme)) { content() }
+        } else {
+            content()
+        }
+    }
 }
 
 fun Bitmap.extractThemeColor(): Color = Color(

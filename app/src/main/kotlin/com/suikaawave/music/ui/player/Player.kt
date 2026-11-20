@@ -6,6 +6,7 @@
 package com.suikaawave.music.ui.player
 
 import com.suikaawave.music.ui.theme.GlassFill
+import com.suikaawave.music.ui.theme.opaqueIfGlass
 import com.suikaawave.music.ui.theme.glassSurface
 import com.suikaawave.music.ui.theme.GLASS_PLAYER_THEME
 import androidx.activity.compose.BackHandler
@@ -820,14 +821,14 @@ fun BottomSheetPlayer(
     val bottomSheetBackgroundColor =
         when (playerBackground) {
             PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT -> {
-                MaterialTheme.colorScheme.surfaceContainer
+                MaterialTheme.colorScheme.surfaceContainer.opaqueIfGlass()
             }
 
             else -> {
                 if (useBlackBackground) {
                     Color.Black
                 } else {
-                    MaterialTheme.colorScheme.surfaceContainer
+                    MaterialTheme.colorScheme.surfaceContainer.opaqueIfGlass()
                 }
             }
         }
@@ -1977,7 +1978,7 @@ fun BottomSheetPlayer(
                     if (useBlackBackground) {
                         Color.Black
                     } else {
-                        MaterialTheme.colorScheme.surfaceContainer
+                        MaterialTheme.colorScheme.surfaceContainer.opaqueIfGlass()
                     },
                 onBackgroundColor = onBackgroundColor,
                 TextBackgroundColor = TextBackgroundColor,

@@ -206,6 +206,7 @@ import com.suikaawave.music.ui.screens.settings.NavigationTab
 import com.suikaawave.music.ui.theme.ColorSaver
 import com.suikaawave.music.ui.theme.AppColorTheme
 import com.suikaawave.music.ui.theme.DefaultThemeColor
+import com.suikaawave.music.ui.theme.GLASS_APP_THEME
 import com.suikaawave.music.ui.theme.SuikaaWaveTheme
 import com.suikaawave.music.ui.theme.extractThemeColor
 import com.suikaawave.music.ui.utils.appBarScrollBehavior
@@ -608,7 +609,7 @@ class MainActivity : FragmentActivity() {
         val isSystemInDarkTheme = isSystemInDarkTheme()
         val useDarkTheme =
             remember(darkTheme, isSystemInDarkTheme) {
-                if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
+                GLASS_APP_THEME || (if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON)
             }
 
         LaunchedEffect(useDarkTheme) {
@@ -692,6 +693,7 @@ class MainActivity : FragmentActivity() {
             pureBlack = pureBlack,
             themeColor = themeColor,
             appTheme = appColorTheme,
+            glass = GLASS_APP_THEME,
         ) {
             val currentDensity = LocalDensity.current
             val windowInfo = LocalWindowInfo.current
